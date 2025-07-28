@@ -5,7 +5,7 @@ import torch
 from vllm import LLM, SamplingParams
 from datasets import load_dataset
 from tqdm import tqdm
-from dataset_configs import get_config
+from dataset_configs import get_config, DATASET_CONFIGS
 
 # LiteLLM을 위한 API 키 설정이 필요하면 여기에서
 # os.environ["OPENAI_API_KEY"] = "YOUR_API_KEY"
@@ -14,7 +14,8 @@ def parse_args():
     """스크립트 실행을 위한 인자들을 파싱합니다."""
     p = argparse.ArgumentParser(description="Run a vLLM model on a dataset and save its responses.")
     p.add_argument("--model", required=True, help="Hugging Face model ID or local path")
-    p.add_argument("--dataset", required=True, help=f"Dataset name. Supported: {list(get_config('').keys())}")
+    p.add_argument("--dataset", required=True,
+                   help=f"Dataset name. Supported: {list(DATASET_CONFIGS.keys())}")
     p.add_argument("--dataset_hub_id", default='HAERAE-HUB/KoSimpleEval', help="Hugging Face Hub ID for the dataset collection")
     p.add_argument("--split", default="test", help="Dataset split (default: test)")
     p.add_argument("--max_tokens", type=int, default=2048, help="Maximum tokens to generate")
