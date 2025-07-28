@@ -53,7 +53,7 @@ def _create_prompt_for_mqa(row, tokenizer):
         tokenize=False, add_generation_prompt=True
     )
 
-def _create_prompt_for_koblat(row, tokenizer):
+def _create_prompt_for_kobalt(row, tokenizer):
     """Kobalt (https://arxiv.org/pdf/2505.16125) Figure 2."""
     query = (
         f"다음 문제에 대해서 충분히 생각하고 추론하여, 10개의 보기(A, B, C, D, E, F, G, H, I, J) 중 정답을 고르세요.\n"
@@ -158,7 +158,7 @@ def _evaluate_arena(df, args):
         ])
 
     responses = batch_completion(
-        model='gpt-4-turbo', # 모델 명 바꿀거ㅕㅁㄴ 바꾸기
+        model='gpt-4-turbo', # 모델 명 바꿀거면 바꾸기
         messages=qrys,
         response_format={"type": "json_object"}
     )
@@ -209,7 +209,7 @@ DATASET_CONFIGS = {
     'aime2025': {'prompt_maker': _create_prompt_for_math, 'evaluator': _evaluate_math},
     'aime2024': {'prompt_maker': _create_prompt_for_math, 'evaluator': _evaluate_math},
     'click': {'prompt_maker': _create_prompt_for_mqa, 'evaluator': _evaluate_mqa},
-    'kobalt': {'prompt_maker': _create_prompt_for_koblat, 'evaluator': _evaluate_kobalt},
+    'kobalt': {'prompt_maker': _create_prompt_for_kobalt, 'evaluator': _evaluate_kobalt},
 
     # 평가 로직 확인 필요한 데이터셋
     'hrm8k-ksm': {'prompt_maker': _create_prompt_for_qa, 'evaluator': _evaluate_placeholder},
