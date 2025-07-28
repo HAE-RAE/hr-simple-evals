@@ -146,6 +146,23 @@ def _evaluate_kobalt(df, args):
     print(f"✅ 평가 완료! 전체 정확도: {accuracy:.2%}")
     return df
 
+# dataset_configs.py 파일의 함수 영역에 추가
+
+def _evaluate_gpqa_as_math(df, args):
+    """gpqa-d 평가를 위해 'Correct Answer'를 'gold'로 변경 후 math 평가 실행"""
+    print("🤖 gpqa-diamond 데이터셋을 수학 문제로 평가합니다...")
+
+    # 'Correct Answer' 컬럼의 이름을 'gold'로 변경
+    if 'Correct Answer' in df.columns:
+        # df.rename은 새로운 데이터프레임을 반환하므로 다시 할당해야 함
+        df = df.rename(columns={'Correct Answer': 'gold'})
+    else:
+        print("⚠️ 'Correct Answer' 컬럼을 찾을 수 없습니다. 평가를 건너뜁니다.")
+        return df
+
+    # 기존 수학 평가 함수(_evaluate_math)를 호출
+    return _evaluate_math(df, args)
+
 def _evaluate_arena(df, args):
     """Arena 데이터셋 평가 (안정적인 JSON 모드 사용)"""
     print("🤖 Arena 평가를 시작합니다 (Judge 모델: gpt-4-turbo, 방식: JSON Mode)...")
@@ -223,10 +240,8 @@ DATASET_CONFIGS = {
     'aime2024': {'prompt_maker': _create_prompt_for_math, 'evaluator': _evaluate_math},
     'click': {'prompt_maker': _create_prompt_for_mqa, 'evaluator': _evaluate_mqa},
     'kobalt': {'prompt_maker': _create_prompt_for_kobalt, 'evaluator': _evaluate_kobalt},
-    'hrm8k-ksm': {'prompt_maker': _create_prompt_for_qa, 'evaluator': _evaluate_hrm8k_ksm},
-
-    # 평가 로직 확인 필요한 데이터셋
-    'gpqa-d': {'prompt_maker': _create_prompt_for_qa, 'evaluator': _evaluate_placeholder},
+    'KSM': {'prompt_maker': _create_prompt_for_qa, 'evaluator': _evaluate_hrm8k_ksm},
+    'gpqa-diamond': {'prompt_maker': _create_prompt_for_qa, 'evaluator': _evaluate_gpqa_as_math},
 }
 
 def get_config(dataset_name):

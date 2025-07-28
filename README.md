@@ -23,6 +23,8 @@ Supported subset names include:
 - `HRB1_0`
 - `KMMLU_Redux`
 - `MCLM`
+- `gpqa-diamond` (You Should use Idavidrein/gpqa - gpqa-diamond subset for evaluation)
+- `KSM` (You Should use HAERAE-HUB/HRM8K - KSM subset for evaluation)
 
 Replace `<model-id-or-path>` with the Hugging Face model ID or a local checkpoint.
 
