@@ -133,8 +133,6 @@ def _evaluate_kobalt(df, args):
     print(f"✅ 평가 완료! 전체 정확도: {accuracy:.2%}")
     return df
 
-# in dataset_configs.py
-
 def _evaluate_arena(df, args):
     """Arena 데이터셋 평가 (안정적인 JSON 모드 사용)"""
     print("🤖 Arena 평가를 시작합니다 (Judge 모델: gpt-4-turbo, 방식: JSON Mode)...")
@@ -204,12 +202,9 @@ def _evaluate_placeholder(df, args):
 # 3. 데이터셋 설정 종합 (메인 컨트롤)
 # ===================================================================
 DATASET_CONFIGS = {
-    # 기존 데이터셋
     'KMMLU-Redux': {'prompt_maker': _create_prompt_for_mqa, 'evaluator': _evaluate_mqa},
     'MCLM': {'prompt_maker': _create_prompt_for_math, 'evaluator': _evaluate_math},
     'ArenaHard': {'prompt_maker': _create_prompt_for_arena, 'evaluator': _evaluate_arena},
-
-    # 신규 추가 데이터셋
     'kmmlu-pro': {'prompt_maker': _create_prompt_for_mqa, 'evaluator': _evaluate_mqa},
     'aime2025': {'prompt_maker': _create_prompt_for_math, 'evaluator': _evaluate_math},
     'aime2024': {'prompt_maker': _create_prompt_for_math, 'evaluator': _evaluate_math},
