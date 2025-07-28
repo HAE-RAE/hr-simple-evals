@@ -122,6 +122,19 @@ def _evaluate_math(df, args):
     print(f"✅ 평가 완료! 전체 정확도: {accuracy:.2%}")
     return df
 
+def _evaluate_hrm8k_ksm(df, args):
+    """hrm8k-ksm 평가를 위해 'answer' 컬럼을 'gold'로 변경 후 math 평가 실행"""
+    print("🤖 hrm8k-ksm 데이터셋 평가를 시작합니다 (컬럼명 변경 후)...")
+    # 'answer' 컬럼을 'gold'로 이름을 변경합니다.
+    if 'answer' in df.columns:
+        df.rename(columns={'answer': 'gold'}, inplace=True)
+    else:
+        print("⚠️ 'answer' 컬럼을 찾을 수 없습니다. 평가를 건너뜁니다.")
+        return df
+
+    # 기존 수학 평가 함수를 호출합니다.
+    return _evaluate_math(df, args)
+
 def _evaluate_kobalt(df, args):
     """Kobalt 평가"""
     print("🤖 Kobalt 평가를 시작합니다...")
@@ -210,9 +223,9 @@ DATASET_CONFIGS = {
     'aime2024': {'prompt_maker': _create_prompt_for_math, 'evaluator': _evaluate_math},
     'click': {'prompt_maker': _create_prompt_for_mqa, 'evaluator': _evaluate_mqa},
     'kobalt': {'prompt_maker': _create_prompt_for_kobalt, 'evaluator': _evaluate_kobalt},
+    'hrm8k-ksm': {'prompt_maker': _create_prompt_for_qa, 'evaluator': _evaluate_hrm8k_ksm},
 
     # 평가 로직 확인 필요한 데이터셋
-    'hrm8k-ksm': {'prompt_maker': _create_prompt_for_qa, 'evaluator': _evaluate_placeholder},
     'gpqa-d': {'prompt_maker': _create_prompt_for_qa, 'evaluator': _evaluate_placeholder},
 }
 
