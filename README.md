@@ -25,7 +25,36 @@ Supported subset names include:
 - `MCLM`
 - `gpqa-diamond` (You Should use Idavidrein/gpqa - gpqa-diamond subset for evaluation)
 - `KSM` (You Should use HAERAE-HUB/HRM8K - KSM subset for evaluation)
+- `default` (You can use yentinglin/aime_2025 or HuggingFaceH4/aime_2024 for evaluation)
 
 Replace `<model-id-or-path>` with the Hugging Face model ID or a local checkpoint.
 
 The script will generate responses using the specified model and evaluate them according to the dataset configuration defined in `dataset_configs.py`.
+
+## Using AIME datasets
+
+You can evaluate models on the AIME (American Invitational Mathematics Examination) datasets:
+
+### AIME 2025
+```bash
+python evaluation.py \
+  --model <model-id-or-path> \
+  --dataset default \
+  --dataset_hub_id yentinglin/aime_2025 \
+  --split train \
+  --temperature 0.0 \
+  --max_tokens 1024
+```
+
+### AIME 2024
+```bash
+python evaluation.py \
+  --model <model-id-or-path> \
+  --dataset default \
+  --dataset_hub_id HuggingFaceH4/aime_2024 \
+  --split train \
+  --temperature 0.0 \
+  --max_tokens 1024
+```
+
+These datasets contain challenging mathematics problems that test a model's mathematical reasoning capabilities.

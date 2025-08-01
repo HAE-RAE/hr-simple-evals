@@ -68,9 +68,12 @@ def _create_prompt_for_kobalt(row, tokenizer):
 
 def _create_prompt_for_math(row, tokenizer):
     """수학 문제(AIME, MCLM)를 위한 프롬프트"""
+    # Check if the dataset has 'question' or 'problem' column
+    question_text = row.get('question', row.get('problem', ''))
+    
     query = (
         f"다음 수학 문제를 풀어주세요. 풀이 과정과 함께 최종 답을 '\\boxed{{정답}}' 형식으로 명확하게 제시해주세요.\n\n"
-        f"문제: {row['question']}"
+        f"문제: {question_text}"
     )
     return tokenizer.apply_chat_template(
         [{"role": "user", "content": query}],
@@ -87,8 +90,9 @@ def _create_prompt_for_qa(row, tokenizer):
 
 def _create_prompt_for_arena(row, tokenizer):
     """Arena 형식 데이터셋을 위한 프롬프트"""
+    query = row['prompts']
     return tokenizer.apply_chat_template(
-        [{"role": "user", "content": row['prompts']}],
+        [{"role": "user", "content": query}],
         tokenize=False, add_generation_prompt=True
     )
 
@@ -114,7 +118,17 @@ def _evaluate_math(df, args):
     print("🤖 수학 문제 평가를 시작합니다...")
 
     df['pred_answer'] = df['response'].apply(_parse_math_answer)
-    df['gold_answer'] = df['gold'].astype(str) # 정답을 문자열로 통일
+    
+    # Check if the dataset has 'gold' or 'answer' column
+    if 'gold' in df.columns:
+        df['gold_answer'] = df['gold'].astype(str)  # 정답을 문자열로 통일
+    elif 'answer' in df.columns:
+        df['gold_answer'] = df['answer'].astype(str)  # 정답을 문자열로 통일
+    else:
+        print("⚠️ 'gold' 또는 'answer' 컬럼을 찾을 수 없습니다. 평가를 건너뜁니다.")
+        df['gold_answer'] = 'N/A'
+        df['correct'] = False
+        return df
 
     df['correct'] = (df['pred_answer'] == df['gold_answer'])
 
@@ -238,6 +252,8 @@ DATASET_CONFIGS = {
     'kmmlu-pro': {'prompt_maker': _create_prompt_for_mqa, 'evaluator': _evaluate_mqa},
     'aime2025': {'prompt_maker': _create_prompt_for_math, 'evaluator': _evaluate_math},
     'aime2024': {'prompt_maker': _create_prompt_for_math, 'evaluator': _evaluate_math},
+    'default': {'prompt_maker': _create_prompt_for_math, 'evaluator': _evaluate_math},  # For yentinglin/aime_2025 default subset
+    'train': {'prompt_maker': _create_prompt_for_math, 'evaluator': _evaluate_math},    # For HuggingFaceH4/aime_2024 train subset
     'click': {'prompt_maker': _create_prompt_for_mqa, 'evaluator': _evaluate_mqa},
     'kobalt': {'prompt_maker': _create_prompt_for_kobalt, 'evaluator': _evaluate_kobalt},
     'KSM': {'prompt_maker': _create_prompt_for_qa, 'evaluator': _evaluate_hrm8k_ksm},
