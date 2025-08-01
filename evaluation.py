@@ -38,11 +38,60 @@ def main() -> None:
         return
     
     print(f"🚀 모델 로딩 중: {args.model}")
-    llm = LLM(model=args.model, tensor_parallel_size=torch.cuda.device_count(), trust_remote_code=True)
-    tokenizer = llm.get_tokenizer()
+    # Use CPU for testing
+    from transformers import AutoTokenizer, AutoModelForCausalLM
+    tokenizer = AutoTokenizer.from_pretrained(args.model)
+    model = AutoModelForCausalLM.from_pretrained(args.model, device_map="cpu", trust_remote_code=True)
+    
+    # Create a simple wrapper class to mimic vLLM's interface
+    class SimpleGenerationOutput:
+        def __init__(self, text):
+            self.text = text
+            
+    class SimpleOutput:
+        def __init__(self, text):
+            self.outputs = [SimpleGenerationOutput(text)]
+            
+    class SimpleLLM:
+        def __init__(self, model, tokenizer):
+            self.model = model
+            self.tokenizer = tokenizer
+            self.max_length = model.config.max_position_embeddings
+            
+        def get_tokenizer(self):
+            return self.tokenizer
+            
+        def generate(self, prompts, sampling_params):
+            outputs = []
+            for prompt in prompts:
+                try:
+                    # Truncate input if it's too long
+                    inputs = self.tokenizer(prompt, return_tensors="pt", truncation=True, max_length=self.max_length - sampling_params.max_tokens)
+                    
+                    output_ids = self.model.generate(
+                        inputs.input_ids, 
+                        max_new_tokens=sampling_params.max_tokens,
+                        do_sample=sampling_params.temperature > 0,
+                        temperature=max(sampling_params.temperature, 1e-5),  # Avoid division by zero
+                        top_p=sampling_params.top_p
+                    )
+                    
+                    output_text = self.tokenizer.decode(output_ids[0][inputs.input_ids.shape[1]:], skip_special_tokens=True)
+                    outputs.append(SimpleOutput(output_text))
+                except Exception as e:
+                    print(f"Error generating response: {e}")
+                    outputs.append(SimpleOutput("Error generating response"))
+            return outputs
+    
+    llm = SimpleLLM(model, tokenizer)
 
     print(f"📚 데이터셋 로딩 중: {args.dataset_hub_id} - {args.dataset}")
     df = load_dataset(args.dataset_hub_id, args.dataset, split=args.split).to_pandas()
+    
+    # For testing purposes, use only a small subset of the data
+    if len(df) > 5:
+        print(f"⚠️ 테스트를 위해 데이터셋을 5개 샘플로 제한합니다 (원래 크기: {len(df)})")
+        df = df.head(5)
 
     print("✍️  프롬프트를 생성하고 있습니다...")
     tqdm.pandas(desc="프롬프트 생성")

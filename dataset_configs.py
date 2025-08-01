@@ -48,10 +48,16 @@ def _create_prompt_for_mqa(row, tokenizer):
         f"{row['choices']}\n\n" # 'choices' 컬럼이 선택지를 포함한 문자열이라고 가정
         "정답:"
     )
-    return tokenizer.apply_chat_template(
-        [{"role": "user", "content": query}],
-        tokenize=False, add_generation_prompt=True
-    )
+    
+    # Check if the tokenizer has a chat template
+    try:
+        return tokenizer.apply_chat_template(
+            [{"role": "user", "content": query}],
+            tokenize=False, add_generation_prompt=True
+        )
+    except (ValueError, AttributeError):
+        # Fallback for models without chat templates
+        return query
 
 def _create_prompt_for_kobalt(row, tokenizer):
     """Kobalt (https://arxiv.org/pdf/2505.16125) Figure 2."""
@@ -61,36 +67,64 @@ def _create_prompt_for_kobalt(row, tokenizer):
         f"답변은 반드시 다음 형식을 엄격히 지켜야 합니다: \"정답은 [정답 보기]입니다.\"로 끝나야하고, [정답 보기]는 A, B, C, D, E, F, G, H, I, J 중 하나여야 합니다.\n"
         f"문제를 풀기 위해, 한번 천천히 생각해봅시다."
     )
-    return tokenizer.apply_chat_template(
-        [{"role": "user", "content": query}],
-        tokenize=False, add_generation_prompt=True
-    )
+    
+    # Check if the tokenizer has a chat template
+    try:
+        return tokenizer.apply_chat_template(
+            [{"role": "user", "content": query}],
+            tokenize=False, add_generation_prompt=True
+        )
+    except (ValueError, AttributeError):
+        # Fallback for models without chat templates
+        return query
 
 def _create_prompt_for_math(row, tokenizer):
     """수학 문제(AIME, MCLM)를 위한 프롬프트"""
+    # Check if the dataset has 'question' or 'problem' column
+    question_text = row.get('question', row.get('problem', ''))
+    
     query = (
         f"다음 수학 문제를 풀어주세요. 풀이 과정과 함께 최종 답을 '\\boxed{{정답}}' 형식으로 명확하게 제시해주세요.\n\n"
-        f"문제: {row['question']}"
+        f"문제: {question_text}"
     )
-    return tokenizer.apply_chat_template(
-        [{"role": "user", "content": query}],
-        tokenize=False, add_generation_prompt=True
-    )
+    
+    # Check if the tokenizer has a chat template
+    try:
+        return tokenizer.apply_chat_template(
+            [{"role": "user", "content": query}],
+            tokenize=False, add_generation_prompt=True
+        )
+    except (ValueError, AttributeError):
+        # Fallback for models without chat templates
+        return query
 
 def _create_prompt_for_qa(row, tokenizer):
     """일반적인 질의응답 데이터셋을 위한 프롬프트 (GPQA, KoBALT 등)"""
     query = f"다음 질문에 대해 상세하고 정확하게 답변해주세요.\n\n질문: {row['question']}"
-    return tokenizer.apply_chat_template(
-        [{"role": "user", "content": query}],
-        tokenize=False, add_generation_prompt=True
-    )
+    
+    # Check if the tokenizer has a chat template
+    try:
+        return tokenizer.apply_chat_template(
+            [{"role": "user", "content": query}],
+            tokenize=False, add_generation_prompt=True
+        )
+    except (ValueError, AttributeError):
+        # Fallback for models without chat templates
+        return query
 
 def _create_prompt_for_arena(row, tokenizer):
     """Arena 형식 데이터셋을 위한 프롬프트"""
-    return tokenizer.apply_chat_template(
-        [{"role": "user", "content": row['prompts']}],
-        tokenize=False, add_generation_prompt=True
-    )
+    query = row['prompts']
+    
+    # Check if the tokenizer has a chat template
+    try:
+        return tokenizer.apply_chat_template(
+            [{"role": "user", "content": query}],
+            tokenize=False, add_generation_prompt=True
+        )
+    except (ValueError, AttributeError):
+        # Fallback for models without chat templates
+        return query
 
 # ===================================================================
 # 2. 평가 실행 함수 (Evaluators)
@@ -114,7 +148,17 @@ def _evaluate_math(df, args):
     print("🤖 수학 문제 평가를 시작합니다...")
 
     df['pred_answer'] = df['response'].apply(_parse_math_answer)
-    df['gold_answer'] = df['gold'].astype(str) # 정답을 문자열로 통일
+    
+    # Check if the dataset has 'gold' or 'answer' column
+    if 'gold' in df.columns:
+        df['gold_answer'] = df['gold'].astype(str)  # 정답을 문자열로 통일
+    elif 'answer' in df.columns:
+        df['gold_answer'] = df['answer'].astype(str)  # 정답을 문자열로 통일
+    else:
+        print("⚠️ 'gold' 또는 'answer' 컬럼을 찾을 수 없습니다. 평가를 건너뜁니다.")
+        df['gold_answer'] = 'N/A'
+        df['correct'] = False
+        return df
 
     df['correct'] = (df['pred_answer'] == df['gold_answer'])
 
@@ -238,6 +282,8 @@ DATASET_CONFIGS = {
     'kmmlu-pro': {'prompt_maker': _create_prompt_for_mqa, 'evaluator': _evaluate_mqa},
     'aime2025': {'prompt_maker': _create_prompt_for_math, 'evaluator': _evaluate_math},
     'aime2024': {'prompt_maker': _create_prompt_for_math, 'evaluator': _evaluate_math},
+    'default': {'prompt_maker': _create_prompt_for_math, 'evaluator': _evaluate_math},  # For yentinglin/aime_2025 default subset
+    'train': {'prompt_maker': _create_prompt_for_math, 'evaluator': _evaluate_math},    # For HuggingFaceH4/aime_2024 train subset
     'click': {'prompt_maker': _create_prompt_for_mqa, 'evaluator': _evaluate_mqa},
     'kobalt': {'prompt_maker': _create_prompt_for_kobalt, 'evaluator': _evaluate_kobalt},
     'KSM': {'prompt_maker': _create_prompt_for_qa, 'evaluator': _evaluate_hrm8k_ksm},
