@@ -48,16 +48,10 @@ def _create_prompt_for_mqa(row, tokenizer):
         f"{row['choices']}\n\n" # 'choices' 컬럼이 선택지를 포함한 문자열이라고 가정
         "정답:"
     )
-    
-    # Check if the tokenizer has a chat template
-    try:
-        return tokenizer.apply_chat_template(
-            [{"role": "user", "content": query}],
-            tokenize=False, add_generation_prompt=True
-        )
-    except (ValueError, AttributeError):
-        # Fallback for models without chat templates
-        return query
+    return tokenizer.apply_chat_template(
+        [{"role": "user", "content": query}],
+        tokenize=False, add_generation_prompt=True
+    )
 
 def _create_prompt_for_kobalt(row, tokenizer):
     """Kobalt (https://arxiv.org/pdf/2505.16125) Figure 2."""
@@ -67,16 +61,10 @@ def _create_prompt_for_kobalt(row, tokenizer):
         f"답변은 반드시 다음 형식을 엄격히 지켜야 합니다: \"정답은 [정답 보기]입니다.\"로 끝나야하고, [정답 보기]는 A, B, C, D, E, F, G, H, I, J 중 하나여야 합니다.\n"
         f"문제를 풀기 위해, 한번 천천히 생각해봅시다."
     )
-    
-    # Check if the tokenizer has a chat template
-    try:
-        return tokenizer.apply_chat_template(
-            [{"role": "user", "content": query}],
-            tokenize=False, add_generation_prompt=True
-        )
-    except (ValueError, AttributeError):
-        # Fallback for models without chat templates
-        return query
+    return tokenizer.apply_chat_template(
+        [{"role": "user", "content": query}],
+        tokenize=False, add_generation_prompt=True
+    )
 
 def _create_prompt_for_math(row, tokenizer):
     """수학 문제(AIME, MCLM)를 위한 프롬프트"""
@@ -87,44 +75,26 @@ def _create_prompt_for_math(row, tokenizer):
         f"다음 수학 문제를 풀어주세요. 풀이 과정과 함께 최종 답을 '\\boxed{{정답}}' 형식으로 명확하게 제시해주세요.\n\n"
         f"문제: {question_text}"
     )
-    
-    # Check if the tokenizer has a chat template
-    try:
-        return tokenizer.apply_chat_template(
-            [{"role": "user", "content": query}],
-            tokenize=False, add_generation_prompt=True
-        )
-    except (ValueError, AttributeError):
-        # Fallback for models without chat templates
-        return query
+    return tokenizer.apply_chat_template(
+        [{"role": "user", "content": query}],
+        tokenize=False, add_generation_prompt=True
+    )
 
 def _create_prompt_for_qa(row, tokenizer):
     """일반적인 질의응답 데이터셋을 위한 프롬프트 (GPQA, KoBALT 등)"""
     query = f"다음 질문에 대해 상세하고 정확하게 답변해주세요.\n\n질문: {row['question']}"
-    
-    # Check if the tokenizer has a chat template
-    try:
-        return tokenizer.apply_chat_template(
-            [{"role": "user", "content": query}],
-            tokenize=False, add_generation_prompt=True
-        )
-    except (ValueError, AttributeError):
-        # Fallback for models without chat templates
-        return query
+    return tokenizer.apply_chat_template(
+        [{"role": "user", "content": query}],
+        tokenize=False, add_generation_prompt=True
+    )
 
 def _create_prompt_for_arena(row, tokenizer):
     """Arena 형식 데이터셋을 위한 프롬프트"""
     query = row['prompts']
-    
-    # Check if the tokenizer has a chat template
-    try:
-        return tokenizer.apply_chat_template(
-            [{"role": "user", "content": query}],
-            tokenize=False, add_generation_prompt=True
-        )
-    except (ValueError, AttributeError):
-        # Fallback for models without chat templates
-        return query
+    return tokenizer.apply_chat_template(
+        [{"role": "user", "content": query}],
+        tokenize=False, add_generation_prompt=True
+    )
 
 # ===================================================================
 # 2. 평가 실행 함수 (Evaluators)
