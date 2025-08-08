@@ -254,10 +254,13 @@ def _evaluate_arena(df, args):
 # 3. 데이터셋 설정 종합 (메인 컨트롤)
 # ===================================================================
 DATASET_CONFIGS = {
-    'KMMLU-Redux': {'prompt_maker': _create_prompt_for_mqa, 'evaluator': _evaluate_mqa},
+    'KMMLU_Redux': {'prompt_maker': _create_prompt_for_mqa, 'evaluator': _evaluate_mqa},
+    'ClinicalQA':  {'prompt_maker': _create_prompt_for_mqa, 'evaluator': _evaluate_mqa},
+    'KMMLU-Pro': {'prompt_maker': _create_prompt_for_mqa, 'evaluator': _evaluate_mqa}, 
+    'KMMLU-HARD': {'prompt_maker': _create_prompt_for_mqa, 'evaluator': _evaluate_mqa}, 
+    'KorMedLawQA': {'prompt_maker': _create_prompt_for_mqa, 'evaluator': _evaluate_mqa}, 
     'MCLM': {'prompt_maker': _create_prompt_for_math, 'evaluator': _evaluate_math},
     'ArenaHard': {'prompt_maker': _create_prompt_for_arena, 'evaluator': _evaluate_arena},
-    'kmmlu-pro': {'prompt_maker': _create_prompt_for_mqa, 'evaluator': _evaluate_mqa},
     'aime_2025': {'prompt_maker': _create_prompt_for_math, 'evaluator': _evaluate_math},
     'aime_2024': {'prompt_maker': _create_prompt_for_math, 'evaluator': _evaluate_math},
     'default': {'prompt_maker': _create_prompt_for_math, 'evaluator': _evaluate_math},

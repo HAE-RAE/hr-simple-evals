@@ -22,6 +22,9 @@ Supported subset names include:
 - `ClinicalQA`
 - `HRB1_0`
 - `KMMLU_Redux`
+- `KMMLU-Pro`
+- `KMMLU-HARD`
+- `KorMedLawQA`
 - `MCLM`
 - `gpqa-diamond` (You Should use Idavidrein/gpqa - gpqa-diamond subset for evaluation)
 - `KSM` (You Should use HAERAE-HUB/HRM8K - KSM subset for evaluation)
