@@ -278,10 +278,8 @@ DATASET_CONFIGS = {
     'train': {'prompt_maker': _create_prompt_for_math, 'evaluator': _evaluate_math},
     'click': {'prompt_maker': _create_prompt_for_mqa, 'evaluator': _evaluate_mqa},
     'kobalt': {'prompt_maker': _create_prompt_for_kobalt, 'evaluator': _evaluate_kobalt},
-    'KSM': {'prompt_maker': _create_prompt_for_qa, 'evaluator': _evaluate_hrm8k_ksm},
-    'gpqa-diamond': {'prompt_maker': _create_prompt_for_qa, 'evaluator': _evaluate_gpqa_as_math},
     
-    # KoSimpleEval 데이터셋 config들 추가
+    # KoSimpleEval 데이터셋 config들 (통합된 데이터셋 사용)
     'HRB1_0': {'prompt_maker': _create_prompt_for_mqa, 'evaluator': _evaluate_mqa},
     'KMMLU': {'prompt_maker': _create_prompt_for_mqa, 'evaluator': _evaluate_mqa},
     'CLIcK': {'prompt_maker': _create_prompt_for_mqa, 'evaluator': _evaluate_mqa},
@@ -289,6 +287,12 @@ DATASET_CONFIGS = {
     'KoBALT-700': {'prompt_maker': _create_prompt_for_kobalt, 'evaluator': _evaluate_kobalt},
     'AIME2024': {'prompt_maker': _create_prompt_for_math, 'evaluator': _evaluate_math},
     'AIME2025': {'prompt_maker': _create_prompt_for_math, 'evaluator': _evaluate_math},
+    'KSM': {'prompt_maker': _create_prompt_for_qa, 'evaluator': _evaluate_hrm8k_ksm},
+    
+    # 기존 외부 데이터셋 이름들도 KoSimpleEval로 리다이렉트 (하위 호환성)
+    'gpqa-diamond': {'prompt_maker': _create_prompt_for_mqa, 'evaluator': _evaluate_mqa},  # GPQA config 사용
+    'aime_2024': {'prompt_maker': _create_prompt_for_math, 'evaluator': _evaluate_math},   # AIME2024 config 사용
+    'aime_2025': {'prompt_maker': _create_prompt_for_math, 'evaluator': _evaluate_math},   # AIME2025 config 사용
 }
 
 def get_config(dataset_name):

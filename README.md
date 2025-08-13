@@ -18,45 +18,80 @@ python evaluation.py \
 
 Supported subset names include:
 
-- `ArenaHard`
-- `ClinicalQA`
-- `HRB1_0`
-- `KMMLU_Redux`
-- `KMMLU-Pro`
-- `KMMLU-HARD`
-- `KorMedLawQA`
-- `MCLM`
-- `gpqa-diamond` (You Should use Idavidrein/gpqa - gpqa-diamond subset for evaluation)
-- `KSM` (You Should use HAERAE-HUB/HRM8K - KSM subset for evaluation)
-- `AIME2024` (You Should use HuggingFaceH4/aime_2024 train subset for evaluation)
-- `AIME2025` (You Should use yentinglin/aime_2025 default subset for evaluation)
+### KoSimpleEval 통합 데이터셋 (권장)
+모든 데이터셋이 `HAERAE-HUB/KoSimpleEval`에 통합되어 있어 일관된 형식으로 사용할 수 있습니다:
+
+- `ArenaHard` - Arena Hard 벤치마크 (500 samples)
+- `ClinicalQA` - 임상 질의응답 (1045 samples)
+- `HRB1_0` - HAERAE Benchmark 1.0 (1538 samples)
+- `KMMLU_Redux` - 한국어 MMLU 축약판 (2742 samples)
+- `KMMLU` - 한국어 MMLU 전체 (35030 samples)
+- `KMMLU-Pro` - KMMLU 고급 버전 (2822 samples)
+- `KMMLU-HARD` - KMMLU 어려운 버전 (4104 samples)
+- `KorMedLawQA` - 한국 의료법 질의응답 (13388 samples)
+- `CLIcK` - 한국 상식 추론 (1995 samples)
+- `MCLM` - 수학 문제 (129 samples)
+- `GPQA` - 과학 질의응답 (198 samples)
+- `KoBALT-700` - 한국어 균형 언어 테스트 (700 samples)
+- `AIME2024` - 2024년 AIME 수학 문제 (30 samples)
+- `AIME2025` - 2025년 AIME 수학 문제 (30 samples)
+- `KSM` - 한국어 수학 문제 (1428 samples)
+
+### 하위 호환성
+기존 외부 데이터셋 이름들도 자동으로 KoSimpleEval로 리다이렉트됩니다:
+- `gpqa-diamond` → `GPQA`
+- `aime_2024` → `AIME2024`  
+- `aime_2025` → `AIME2025`
 
 Replace `<model-id-or-path>` with the Hugging Face model ID or a local checkpoint.
 
 The script will generate responses using the specified model and evaluate them according to the dataset configuration defined in `dataset_configs.py`.
 
-## Using AIME datasets
+## 사용 예시
 
-You can evaluate models on the AIME (American Invitational Mathematics Examination) datasets:
+### KoSimpleEval 통합 데이터셋 사용 (권장)
+모든 데이터셋이 통합되어 있어 간단하게 사용할 수 있습니다:
 
-### AIME 2025
 ```bash
+# AIME 2025 수학 문제
 python evaluation.py \
   --model <model-id-or-path> \
-  --dataset_hub_id yentinglin/aime_2025 \
-  --split default \
+  --dataset AIME2025 \
+  --temperature 0.0 \
+  --max_tokens 1024
+
+# AIME 2024 수학 문제  
+python evaluation.py \
+  --model <model-id-or-path> \
+  --dataset AIME2024 \
+  --temperature 0.0 \
+  --max_tokens 1024
+
+# GPQA 과학 질의응답
+python evaluation.py \
+  --model <model-id-or-path> \
+  --dataset GPQA \
+  --temperature 0.0 \
+  --max_tokens 1024
+
+# 한국어 수학 문제 (KSM)
+python evaluation.py \
+  --model <model-id-or-path> \
+  --dataset KSM \
   --temperature 0.0 \
   --max_tokens 1024
 ```
 
-### AIME 2024
+### 하위 호환성
+기존 명령어도 자동으로 KoSimpleEval로 리다이렉트됩니다:
+
 ```bash
+# 이전 방식 (여전히 작동함)
 python evaluation.py \
   --model <model-id-or-path> \
-  --dataset_hub_id HuggingFaceH4/aime_2024 \
-  --split train \
+  --dataset gpqa-diamond \
   --temperature 0.0 \
   --max_tokens 1024
 ```
 
-These datasets contain challenging mathematics problems that test a model's mathematical reasoning capabilities.
+이 명령어는 자동으로 `HAERAE-HUB/KoSimpleEval`의 `GPQA` config를 사용합니다.

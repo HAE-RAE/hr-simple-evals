@@ -103,6 +103,21 @@ def main() -> None:
         print(f"오류: {e}")
         return
     
+    # 2. 데이터셋 이름에 따른 hub_id와 config 매핑 (KoSimpleEval 우선 사용)
+    dataset_mapping = {
+        'gpqa-diamond': ('HAERAE-HUB/KoSimpleEval', 'GPQA'),
+        'aime_2024': ('HAERAE-HUB/KoSimpleEval', 'AIME2024'),
+        'aime_2025': ('HAERAE-HUB/KoSimpleEval', 'AIME2025'),
+    }
+    
+    # 매핑된 데이터셋이 있으면 해당 정보 사용, 없으면 기본값 사용
+    if args.dataset in dataset_mapping:
+        hub_id, config_name = dataset_mapping[args.dataset]
+        print(f"📋 '{args.dataset}' → KoSimpleEval의 '{config_name}' config 사용")
+    else:
+        hub_id = args.dataset_hub_id
+        config_name = args.dataset
+    
     # 2. 중복 configuration 등록 문제 해결
     _handle_duplicate_config_registration(args.model)
     
@@ -127,8 +142,8 @@ def main() -> None:
             print(f"❌ 모델 로딩 중 예상치 못한 오류: {e}")
             return
 
-    print(f"📚 데이터셋 로딩 중: {args.dataset_hub_id} - {args.dataset}")
-    df = load_dataset(args.dataset_hub_id, args.dataset, split=args.split).to_pandas()
+    print(f"📚 데이터셋 로딩 중: {hub_id} - {config_name}")
+    df = load_dataset(hub_id, config_name, split=args.split).to_pandas()
 
     print("✍️  프롬프트를 생성하고 있습니다...")
     tqdm.pandas(desc="프롬프트 생성")
