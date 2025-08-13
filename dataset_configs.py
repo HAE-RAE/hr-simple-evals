@@ -70,14 +70,24 @@ def _parse_answer_from_prompt(response: str, task="kobalt") -> str:
 
 def _create_prompt_for_mqa(row, tokenizer):
     """객관식 문제(KMMLU, kmmlu-pro)를 위한 프롬프트를 생성합니다."""
-    query = (
-        f"다음은 '{row['category']}' 분야의 객관식 문제입니다. "
-        f"가장 적절한 선택지를 하나만 골라 그 알파벳을 답해주세요.\n\n"
-        f"문제: {row['question']}\n\n"
-        "선택지:\n"
-        f"{row['choices']}\n\n"
-        "정답:"
-    )
+    # choices 컬럼이 있는 경우와 없는 경우를 모두 처리
+    if 'choices' in row and row['choices']:
+        query = (
+            f"다음은 '{row['category']}' 분야의 객관식 문제입니다. "
+            f"가장 적절한 선택지를 하나만 골라 그 알파벳을 답해주세요.\n\n"
+            f"문제: {row['question']}\n\n"
+            "선택지:\n"
+            f"{row['choices']}\n\n"
+            "정답:"
+        )
+    else:
+        # choices 컬럼이 없는 경우 (KoSimpleEval 등), question에 선택지가 포함되어 있음
+        query = (
+            f"다음은 '{row['category']}' 분야의 객관식 문제입니다. "
+            f"가장 적절한 선택지를 하나만 골라 그 번호나 알파벳을 답해주세요.\n\n"
+            f"{row['question']}\n\n"
+            "정답:"
+        )
     return tokenizer.apply_chat_template(
         [{"role": "user", "content": query}],
         tokenize=False, add_generation_prompt=True
@@ -254,6 +264,7 @@ def _evaluate_arena(df, args):
 # 3. 데이터셋 설정 종합 (메인 컨트롤)
 # ===================================================================
 DATASET_CONFIGS = {
+    # 기존 설정들
     'KMMLU_Redux': {'prompt_maker': _create_prompt_for_mqa, 'evaluator': _evaluate_mqa},
     'ClinicalQA':  {'prompt_maker': _create_prompt_for_mqa, 'evaluator': _evaluate_mqa},
     'KMMLU-Pro': {'prompt_maker': _create_prompt_for_mqa, 'evaluator': _evaluate_mqa}, 
@@ -269,6 +280,15 @@ DATASET_CONFIGS = {
     'kobalt': {'prompt_maker': _create_prompt_for_kobalt, 'evaluator': _evaluate_kobalt},
     'KSM': {'prompt_maker': _create_prompt_for_qa, 'evaluator': _evaluate_hrm8k_ksm},
     'gpqa-diamond': {'prompt_maker': _create_prompt_for_qa, 'evaluator': _evaluate_gpqa_as_math},
+    
+    # KoSimpleEval 데이터셋 config들 추가
+    'HRB1_0': {'prompt_maker': _create_prompt_for_mqa, 'evaluator': _evaluate_mqa},
+    'KMMLU': {'prompt_maker': _create_prompt_for_mqa, 'evaluator': _evaluate_mqa},
+    'CLIcK': {'prompt_maker': _create_prompt_for_mqa, 'evaluator': _evaluate_mqa},
+    'GPQA': {'prompt_maker': _create_prompt_for_mqa, 'evaluator': _evaluate_mqa},
+    'KoBALT-700': {'prompt_maker': _create_prompt_for_kobalt, 'evaluator': _evaluate_kobalt},
+    'AIME2024': {'prompt_maker': _create_prompt_for_math, 'evaluator': _evaluate_math},
+    'AIME2025': {'prompt_maker': _create_prompt_for_math, 'evaluator': _evaluate_math},
 }
 
 def get_config(dataset_name):
